@@ -1,10 +1,8 @@
 const app = require('./app');
-
+const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: './config.env' });
-
-const mongoose = require('mongoose');
 
 mongoose
   .connect(process.env.DATABASE, {})
@@ -14,8 +12,6 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-
-const tourScheme = new mongoose.Schema({});
 
 // console.log(process.env); // global ozgaruvchilarni korsatadi
 
