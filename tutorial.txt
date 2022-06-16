@@ -1,0 +1,19 @@
+1.npm init -y
+2.npm i express
+api yaratishini qoidalari
+1.magic.uz/student yozdikmi faqat studentni malumotlarini yozish kk teacherni emas
+2.keyin metodlarni nomini urlga yozish kerak masalan emas magic.uz/addStudent magic.uz/deleteStudent
+3.Malumotlarni jonatayotganda Json formatda jonatilishi kerak
+
+app.get('/home', (req, res) => {
+  res.status(200).json({
+    status: 'succes',
+    results: data.length,
+    data: {
+      data,
+    },
+  });
+});
+
+jsonni ichiga shundoq datani yozish kerak emas unga statusi resulti yana bir balolani qoshib jonatish kerak bular jsend deyiladi
+
