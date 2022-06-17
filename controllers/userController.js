@@ -31,9 +31,8 @@ const postAlluser = async (req, res) => {
 };
 const getUserById = async (req, res) => {
   try {
-    const id = +req.params.id;
+    const id = req.params.id;
     const data = await User.findById(id);
-    console.log(req, params.id);
     res.status(200).json({
       status: 'succes',
       data: data,
