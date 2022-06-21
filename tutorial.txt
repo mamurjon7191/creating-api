@@ -17,3 +17,7 @@ app.get('/home', (req, res) => {
 
 jsonni ichiga shundoq datani yozish kerak emas unga statusi resulti yana bir balolani qoshib jonatish kerak bular jsend deyiladi
 
+
+4.magic.uz/api/v1/tours/:id/:name--->paramentrni yomon tarafi idni tashab nameni yozib ketolmimiz 
+
+

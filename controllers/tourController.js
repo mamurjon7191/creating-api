@@ -1,19 +1,36 @@
 /// tours controllerlari
 const Tour = require('../models/tourModel');
 
+const FeatureAPI = require('./../utility/featureApi');
+
 const getAllTours = async (req, res) => {
   try {
-    const tour = await Tour.find();
+    const query = new FeatureAPI(req.query, Tour)
+      .filter()
+      .sorting()
+      .field()
+      .pagination();
+
+    const tours = await query.dataBaseQuery;
+
     res.status(200).json({
       status: 'succces',
-      data: tour,
+      results: tours.length,
+      data: tours,
     });
   } catch (err) {
     res.status(404).json({
-      status: 'succes',
-      message: err,
+      status: 'fail',
+      message: err.message,
     });
   }
+  // const queryObj = { ...req.query };
+
+  //---Sorting
+
+  //---Field
+
+  //--Pagination
 };
 
 const postTour = async (req, res) => {
@@ -77,10 +94,83 @@ const deleteTour = async (req, res) => {
   }
 };
 
+const tourStats = async (req, res) => {
+  try {
+    const data = await Tour.aggregate([
+      { $match: { ratingsAverage: { $gte: 4.5 } } }, // togri keladiganini chiqazadi
+      {
+        $group: {
+          //_id bn $sum bolishi kerak oxshashlarini gruppa qilib qoyadi
+          _id: { $toUpper: '$difficulty' },
+          numberTours: { $sum: 1 },
+          urtachaNarx: { $avg: '$price' },
+          engArzonNarx: { $min: '$price' },
+          engQimmatNarx: { $max: '$price' },
+          ortachaReyting: { $avg: '$ratingsAverage' },
+        },
+      },
+      {
+        $sort: { ortachaReyting: -1 }, // sort qilish
+      },
+      {
+        $project: { numberTours: 0 }, // ochirish
+      },
+    ]);
+    res.status(200).json({
+      status: 'succes',
+      result: data.length,
+      data: data,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'failed',
+      message: err.message,
+    });
+  }
+};
+
+const tuorReportYear = async (req, res) => {
+  console.log(req.params.year);
+  try {
+    const data = await Tour.aggregate([
+      { $unwind: '$startDates' },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${req.params.year}-01-01`),
+            $lte: new Date(`${req.params.year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$startDates' },
+          tourlarSoni: { $sum: 1 },
+          tourNomi: { $push: '$name' },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'failed',
+      results: data.length,
+      data: data,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'failed',
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   getAllTours,
   postTour,
   getTourById,
   updateTour,
   deleteTour,
+  tourStats,
+  tuorReportYear,
 };
+console.log(new Date('2021-06-19,10:00'));
