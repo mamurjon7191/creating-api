@@ -61,7 +61,7 @@ class FeatureAPI {
   }
   pagination() {
     const page = this.cleintQuery.page || 1;
-    const limit = this.cleintQuery.limit || 3;
+    const limit = this.cleintQuery.limit;
     this.dataBaseQuery = this.dataBaseQuery
       .skip((page - 1) * limit)
       .limit(limit);

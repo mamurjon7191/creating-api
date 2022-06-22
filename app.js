@@ -20,6 +20,14 @@ app.use(express.static('public'));
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
+app.all('*', (req, res, next) => {
+  res.status(400).json({
+    status: 'fail',
+    message: 'Siz mavjud bolmagan routega murojat qildingiz',
+  });
+  next();
+});
+
 // app.get('/api/v1/tours', getAllTours);
 // app.post('/api/v1/tours', postTour);
 // app.get('/api/v1/tours/:id', getTourById);

@@ -45,7 +45,10 @@ const postTour = async (req, res) => {
       data: tour,
     });
   } catch (err) {
-    console.log(err);
+    res.status(404).json({
+      status: 'succes',
+      message: err.message,
+    });
   }
 };
 const getTourById = async (req, res) => {
