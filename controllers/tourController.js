@@ -3,27 +3,28 @@ const Tour = require('../models/tourModel');
 
 const FeatureAPI = require('./../utility/featureApi');
 
-const getAllTours = async (req, res) => {
-  try {
-    const query = new FeatureAPI(req.query, Tour)
-      .filter()
-      .sorting()
-      .field()
-      .pagination();
+const catchErrAsync = (funksiya) => {
+  const catchFunc = (req, res, next) => {
+    funksiya(req, res).catch((err) => next(err));
+  };
+  return catchFunc;
+};
 
-    const tours = await query.dataBaseQuery;
+const getAllTours = catchErrAsync(async (req, res) => {
+  const query = new FeatureAPI(req.query, Tour)
+    .filter()
+    .sorting()
+    .field()
+    .pagination();
 
-    res.status(200).json({
-      status: 'succces',
-      results: tours.length,
-      data: tours,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err.message,
-    });
-  }
+  const tours = await query.dataBaseQuery;
+
+  res.status(200).json({
+    status: 'succces',
+    results: tour.length,
+    data: tours,
+  });
+
   // const queryObj = { ...req.query };
 
   //---Sorting
@@ -31,71 +32,43 @@ const getAllTours = async (req, res) => {
   //---Field
 
   //--Pagination
-};
+});
 
-const postTour = async (req, res) => {
-  try {
-    const data = req.body;
-    // const newTour = new Tour(data);
-    // newTour.save();
-    const tour = await Tour.create(data);
+const postTour = catchErrAsync(async (req, res) => {
+  const data = req.body;
+  // const newTour = new Tour(data);
+  // newTour.save();
+  const tour = await Tour.create(data);
 
-    res.status(200).json({
-      status: 'succes',
-      data: tour,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'succes',
-      message: err.message,
-    });
-  }
-};
-const getTourById = async (req, res) => {
-  try {
-    const tour = await Tour.findById(req.params.id);
-    res.status(400).json({
-      status: 'succes',
-      data: tour,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
-      message: err,
-    });
-  }
-};
+  res.status(200).json({
+    status: 'succes',
+    data: tour,
+  });
+});
+const getTourById = catchErrAsync(async (req, res) => {
+  const tour = await Tour.findById(req.params.id);
+  res.status(400).json({
+    status: 'succes',
+    data: tour,
+  });
+});
 
-const updateTour = async (req, res) => {
-  try {
-    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    res.status(200).json({
-      status: 'succes',
-      data: tour,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
-      message: err,
-    });
-  }
-};
+const updateTour = catchErrAsync(async (req, res) => {
+  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  res.status(200).json({
+    status: 'succes',
+    data: tour,
+  });
+});
 
-const deleteTour = async (req, res) => {
-  try {
-    const tour = await Tour.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: 'succes',
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
-      message: err,
-    });
-  }
-};
+const deleteTour = catchErrAsync(async (req, res) => {
+  const tour = await Tour.findByIdAndDelete(req.params.id);
+  res.status(204).json({
+    status: 'succes',
+  });
+});
 
 const tourStats = async (req, res) => {
   try {

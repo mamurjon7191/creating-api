@@ -3,6 +3,8 @@ const morgan = require('morgan');
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
 
+const AppError = require('./utility/appError');
+
 const app = express();
 
 app.use(express.json()); // midleware
@@ -21,9 +23,25 @@ app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
 app.all('*', (req, res, next) => {
-  res.status(400).json({
-    status: 'fail',
-    message: 'Siz mavjud bolmagan routega murojat qildingiz',
+  // all yozganimizni sababi qaysi urlga murojat qilishimizni bilmaymiz
+  // const err = {
+  //   statusCode: 404,
+  //   status: 'fail',
+  //   message: `${req.originalUrl} is not defined`, // qaysi url is not defined
+  // };
+  next(new AppError('This page is not defined', 404)); // biror bir narsani nextni ichiga bervorsak  (tortali argument kiradigan midlwarega) birinchi argument bolib kiradi
+});
+
+app.use((err, req, res, next) => {
+  err.statusCode = err.statusCode || 404;
+  err.status = err.status || 'fail';
+  err.message = err.message || 'Page is not defined';
+  console.log(err);
+  res.status(err.statusCode).json({
+    status: err.status,
+    statusCode: err.statusCode,
+    message: err.message,
+    stack: err.stack,
   });
   next();
 });

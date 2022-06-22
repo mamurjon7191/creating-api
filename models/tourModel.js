@@ -88,7 +88,6 @@ tourScheme.pre('save', function (next) {
 });
 
 tourScheme.post('save', function (doc, next) {
-  console.log(Date.now() - doc.startTime);
   next();
 });
 
@@ -99,7 +98,6 @@ tourScheme.pre('find', function (next) {
   next();
 });
 tourScheme.post('find', function (doc, next) {
-  console.log(doc);
   next();
 });
 
