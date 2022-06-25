@@ -1,14 +1,9 @@
 /// tours controllerlari
 const Tour = require('../models/tourModel');
 
-const FeatureAPI = require('./../utility/featureApi');
+const catchErrAsync = require('../utility/catchAsync');
 
-const catchErrAsync = (funksiya) => {
-  const catchFunc = (req, res, next) => {
-    funksiya(req, res).catch((err) => next(err));
-  };
-  return catchFunc;
-};
+const FeatureAPI = require('./../utility/featureApi');
 
 const getAllTours = catchErrAsync(async (req, res) => {
   const query = new FeatureAPI(req.query, Tour)
@@ -21,7 +16,7 @@ const getAllTours = catchErrAsync(async (req, res) => {
 
   res.status(200).json({
     status: 'succces',
-    results: tour.length,
+    results: tours.length,
     data: tours,
   });
 
@@ -47,6 +42,9 @@ const postTour = catchErrAsync(async (req, res) => {
 });
 const getTourById = catchErrAsync(async (req, res) => {
   const tour = await Tour.findById(req.params.id);
+  if (!tour) {
+    throw new Error('Bunday idlik malumot topilmadi');
+  }
   res.status(400).json({
     status: 'succes',
     data: tour,
@@ -57,6 +55,9 @@ const updateTour = catchErrAsync(async (req, res) => {
   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });
+  if (!tour) {
+    throw new Error('Bunday idlik malumot topilmadi');
+  }
   res.status(200).json({
     status: 'succes',
     data: tour,
@@ -65,80 +66,69 @@ const updateTour = catchErrAsync(async (req, res) => {
 
 const deleteTour = catchErrAsync(async (req, res) => {
   const tour = await Tour.findByIdAndDelete(req.params.id);
+  if (!tour) {
+    throw new Error('Bunday idlik malumot topilmadi');
+  }
   res.status(204).json({
     status: 'succes',
   });
 });
 
-const tourStats = async (req, res) => {
-  try {
-    const data = await Tour.aggregate([
-      { $match: { ratingsAverage: { $gte: 4.5 } } }, // togri keladiganini chiqazadi
-      {
-        $group: {
-          //_id bn $sum bolishi kerak oxshashlarini gruppa qilib qoyadi
-          _id: { $toUpper: '$difficulty' },
-          numberTours: { $sum: 1 },
-          urtachaNarx: { $avg: '$price' },
-          engArzonNarx: { $min: '$price' },
-          engQimmatNarx: { $max: '$price' },
-          ortachaReyting: { $avg: '$ratingsAverage' },
-        },
+const tourStats = catchErrAsync(async (req, res) => {
+  const data = await Tour.aggregate([
+    { $match: { ratingsAverage: { $gte: 4.5 } } }, // togri keladiganini chiqazadi
+    {
+      $group: {
+        //_id bn $sum bolishi kerak oxshashlarini gruppa qilib qoyadi
+        _id: { $toUpper: '$difficulty' },
+        numberTours: { $sum: 1 },
+        urtachaNarx: { $avg: '$price' },
+        engArzonNarx: { $min: '$price' },
+        engQimmatNarx: { $max: '$price' },
+        ortachaReyting: { $avg: '$ratingsAverage' },
       },
-      {
-        $sort: { ortachaReyting: -1 }, // sort qilish
-      },
-      {
-        $project: { numberTours: 0 }, // ochirish
-      },
-    ]);
-    res.status(200).json({
-      status: 'succes',
-      result: data.length,
-      data: data,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
-      message: err.message,
-    });
-  }
-};
+    },
+    {
+      $sort: { ortachaReyting: -1 }, // sort qilish
+    },
+    {
+      $project: { numberTours: 0 }, // ochirish
+    },
+  ]);
+  res.status(200).json({
+    status: 'succes',
+    result: data.length,
+    data: data,
+  });
+});
 
-const tuorReportYear = async (req, res) => {
+const tuorReportYear = catchErrAsync(async (req, res) => {
   console.log(req.params.year);
-  try {
-    const data = await Tour.aggregate([
-      { $unwind: '$startDates' },
-      {
-        $match: {
-          startDates: {
-            $gte: new Date(`${req.params.year}-01-01`),
-            $lte: new Date(`${req.params.year}-12-31`),
-          },
+  const data = await Tour.aggregate([
+    { $unwind: '$startDates' },
+    {
+      $match: {
+        startDates: {
+          $gte: new Date(`${req.params.year}-01-01`),
+          $lte: new Date(`${req.params.year}-12-31`),
         },
       },
-      {
-        $group: {
-          _id: { $month: '$startDates' },
-          tourlarSoni: { $sum: 1 },
-          tourNomi: { $push: '$name' },
-        },
+    },
+    {
+      $group: {
+        _id: { $month: '$startDates' },
+        tourlarSoni: { $sum: 1 },
+        tourNomi: { $push: '$name' },
       },
-    ]);
+    },
+  ]);
 
-    res.status(200).json({
-      status: 'failed',
-      results: data.length,
-      data: data,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
-      message: err.message,
-    });
-  }
-};
+  res.status(200).json({
+    status: 'failed',
+    results: data.length,
+    data: data,
+  });
+});
 
 module.exports = {
   getAllTours,

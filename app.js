@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
+const errController = require('./controllers/errController');
 
 const AppError = require('./utility/appError');
 
@@ -32,19 +33,7 @@ app.all('*', (req, res, next) => {
   next(new AppError('This page is not defined', 404)); // biror bir narsani nextni ichiga bervorsak  (tortali argument kiradigan midlwarega) birinchi argument bolib kiradi
 });
 
-app.use((err, req, res, next) => {
-  err.statusCode = err.statusCode || 404;
-  err.status = err.status || 'fail';
-  err.message = err.message || 'Page is not defined';
-  console.log(err);
-  res.status(err.statusCode).json({
-    status: err.status,
-    statusCode: err.statusCode,
-    message: err.message,
-    stack: err.stack,
-  });
-  next();
-});
+app.use(errController);
 
 // app.get('/api/v1/tours', getAllTours);
 // app.post('/api/v1/tours', postTour);
