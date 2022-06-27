@@ -8,9 +8,11 @@ const userRouter = express.Router();
 
 userRouter.route('/signup').post(authController.signup);
 
+userRouter.route('/signin').post(authController.login);
+
 userRouter
   .route('/')
-  .get(userController.getAlluser)
+  .get(authController.protect, userController.getAlluser)
   .post(userController.postAlluser);
 
 userRouter

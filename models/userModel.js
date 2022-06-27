@@ -27,6 +27,12 @@ const userScheme = mongoose.Schema({
   photo: {
     type: String,
   },
+  role: {
+    type: String,
+    enum: ['user', 'guide', 'moderator', 'team-lead', 'admin'],
+    default: 'user',
+    required: [true, 'Siz roleni kiritishingiz kerak'],
+  },
   password: {
     type: String,
     required: [true, 'Siz passwordni kiritishingiz shart'],
@@ -36,7 +42,7 @@ const userScheme = mongoose.Schema({
       validator: function (val) {
         return validator.isStrongPassword(val);
       },
-      message: 'Iltimos togri email kiriting!',
+      message: 'Iltimos togri password kiriting!',
     },
   },
   passwordConfirm: {
