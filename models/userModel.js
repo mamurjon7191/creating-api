@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const bcrypt = require('bcryptjs');
 
+const crypto = require('crypto'); //bu node js ni defaoult holatidagi moduli random un kk
+
 const validator = require('validator'); //emailni ishlatish uchun kutubxonani yuklab oldik
 
 const userScheme = mongoose.Schema({
@@ -60,6 +62,8 @@ const userScheme = mongoose.Schema({
     type: Date,
     default: null,
   },
+  resetTokenHash: String,
+  reserTokenVaqti: Date,
 });
 
 userScheme.pre('save', async function (next) {
@@ -74,6 +78,11 @@ userScheme.pre('save', async function (next) {
 
   next();
 });
+
+userScheme.methods.createHashToken = function () {
+  const randomToken = crypto.randomBytes(32).toString('hex'); // hex ham nuber ham string
+  return randomToken;
+};
 
 const User = mongoose.model('users', userScheme);
 

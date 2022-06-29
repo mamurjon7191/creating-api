@@ -161,14 +161,17 @@ const role = (roles) => {
 };
 
 const forgotPassword = catchErrAsync(async (req, res, next) => {
-  // 1.Emailni yozil yozilmaganini topish
+  // 1.Emailni yozilgan yozilmaganini topish
+
+  if (!req.body.email) {
+    return next(new AppError('Emailni kiritishingiz shart'));
+  }
 
   // 2.Database  da shu emailli odam bormi yoqmi qidirish
 
   // 3.Reset token yaratish
 
   // 4.User kiritgan emailga reset tokenni jonatish
-  const email = req.body.email;
 });
 
 module.exports = { signup, login, protect, role, forgotPassword };
