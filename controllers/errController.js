@@ -6,6 +6,10 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'fail';
   err.message = err.message || 'Page is not defined';
 
+  if (err.message == 'invalid signature') {
+    err.message = 'Your token is not valid';
+  }
+
   if (process.env.NODE_ENV == 'DEVELOPMENT') {
     res.status(err.statusCode).json({
       status: err.status,

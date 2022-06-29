@@ -10,15 +10,21 @@ userRouter.route('/signup').post(authController.signup);
 
 userRouter.route('/signin').post(authController.login);
 
+userRouter.route('/forgotpassword').post(authController.forgotPassword);
+
 userRouter
   .route('/')
   .get(authController.protect, userController.getAlluser)
-  .post(userController.postAlluser);
+  .post(authController.protect, userController.postAlluser);
 
 userRouter
   .route('/:id')
-  .delete(userController.deleteUser)
-  .patch(userController.updateUser)
-  .get(userController.getUserById);
+  .delete(
+    authController.protect,
+    authController.role(['admin', 'team-lead']),
+    userController.deleteUser
+  )
+  .patch(authController.protect, userController.updateUser)
+  .get(authController.protect, userController.getUserById);
 
 module.exports = userRouter;

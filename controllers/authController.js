@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const AppError = require('../utility/appError');
 
 const createToken = (id) => {
-  return jwt.sign({}, process.env.JWT_SECRET, {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
@@ -20,6 +20,8 @@ const signup = catchErrAsync(async (req, res, next) => {
     photo: req.body.photo,
     passwordConfirm: req.body.passwordConfirm,
     email: req.body.email,
+    passwordChangedDate: req.body.passwordChangedDate,
+    role: req.body.role,
   });
 
   // tokenni yasadik
@@ -46,7 +48,7 @@ const login = catchErrAsync(async (req, res, next) => {
 
   const user = await User.findOne({
     email,
-  });
+  }).select('+password');
 
   if (!user) {
     return next(
@@ -106,24 +108,71 @@ const protect = catchErrAsync(async (req, res, next) => {
 
   // 2.Tokenni tekshirish user olib ketgan token bn serverni tokeni
 
-  const tekshir = await jwt.verify(token, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
+  const tekshir = await jwt.verify(token, process.env.JWT_SECRET); // bu error qaytaradi
 
   if (!tekshir) {
     return next(
       new AppError('Bunday token mavjud emas iltimos qayta urinib koring', 401)
     );
   }
-  console.log(tekshir);
+
+  // console.log(tekshir);
 
   // 3.Tokenni ichidan idni olib data basedagi userlarni id si bilan solishtirish
 
-  // 4.
+  const user = await User.findOne({ _id: tekshir.id });
+
+  if (!user) {
+    return next(
+      new AppError('Bunday user mavjud emas iltimos qayta kiriting', 401)
+    );
+  }
+
+  // 4 Agar parol ozgargan bolsa tokenni amal qilishi tugagani tekshirish
+
+  if (user.passwordChangedDate) {
+    // true bosa kirishi kk
+    //user.passwordChangedDate.getTime() / 1000 sekundga otkazdik
+    console.log(tekshir.iat, user.passwordChangedDate.getTime() / 1000);
+    if (tekshir.iat < user.passwordChangedDate.getTime() / 1000) {
+      return next(
+        new AppError(
+          "Siz tokenningiz yaroqzsiz iltimos qayta ro'yhatdan otishingiz kerak",
+          401
+        )
+      );
+    }
+  }
+  console.log(user);
+  req.user = user;
   next();
 });
 
-module.exports = { signup, login, protect };
-// FVJiQvjmreLt4k8X4
-//"email": "mamur777@gmail.com",
-//  "password": "FVJiQvjmreLt4k8X4",
+const role = (roles) => {
+  return catchErrAsync(async (req, res, next) => {
+    // 1.Userni rolini olamiz databasedan ,tekshiramiz
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('Sizni bu amalni bajarishga imkoniyatingiz yoq', 401)
+      );
+    }
+    next();
+  });
+};
+
+const forgotPassword = catchErrAsync(async (req, res, next) => {
+  // 1.Emailni yozil yozilmaganini topish
+
+  // 2.Database  da shu emailli odam bormi yoqmi qidirish
+
+  // 3.Reset token yaratish
+
+  // 4.User kiritgan emailga reset tokenni jonatish
+  const email = req.body.email;
+});
+
+module.exports = { signup, login, protect, role, forgotPassword };
+
+// autentifikatsiya -->login
+
+// autorizatsiya --> saytga kirgandan keyin sizga berilgan vakolat -->userni rollari admin,super-admin moderator

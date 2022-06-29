@@ -44,6 +44,7 @@ const userScheme = mongoose.Schema({
       },
       message: 'Iltimos togri password kiriting!',
     },
+    select: false, //responsega kemaydi lekin databasega yozadi
   },
   passwordConfirm: {
     type: String,
@@ -54,6 +55,10 @@ const userScheme = mongoose.Schema({
       },
       message: 'Iltimos siz bir xil password kiriting',
     },
+  },
+  passwordChangedDate: {
+    type: Date,
+    default: null,
   },
 });
 

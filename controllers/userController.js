@@ -9,6 +9,7 @@ const getAlluser = catchErrAsync(async (req, res) => {
   });
   res.status(404).json({
     status: 'Failed',
+    user: req.user,
     message: err,
   });
 });
