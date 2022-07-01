@@ -110,12 +110,6 @@ const protect = catchErrAsync(async (req, res, next) => {
 
   const tekshir = await jwt.verify(token, process.env.JWT_SECRET); // bu error qaytaradi
 
-  if (!tekshir) {
-    return next(
-      new AppError('Bunday token mavjud emas iltimos qayta urinib koring', 401)
-    );
-  }
-
   // console.log(tekshir);
 
   // 3.Tokenni ichidan idni olib data basedagi userlarni id si bilan solishtirish
@@ -132,7 +126,7 @@ const protect = catchErrAsync(async (req, res, next) => {
 
   if (user.passwordChangedDate) {
     // true bosa kirishi kk
-    //user.passwordChangedDate.getTime() / 1000 sekundga otkazdik
+    //user.passwordChangedDate.getTime() / 1000 milli sekundga otkazdik
     console.log(tekshir.iat, user.passwordChangedDate.getTime() / 1000);
     if (tekshir.iat < user.passwordChangedDate.getTime() / 1000) {
       return next(
