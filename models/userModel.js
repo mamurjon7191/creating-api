@@ -63,7 +63,7 @@ const userScheme = mongoose.Schema({
     default: null,
   },
   resetTokenHash: String,
-  reserTokenVaqti: Date,
+  resetTokenVaqti: Date,
 });
 
 userScheme.pre('save', async function (next) {
@@ -79,9 +79,16 @@ userScheme.pre('save', async function (next) {
   next();
 });
 
-userScheme.methods.createHashToken = function () {
-  const randomToken = crypto.randomBytes(32).toString('hex'); // hex ham nuber ham string
-  return randomToken;
+userScheme.methods.hashTokenMethod = function () {
+  const token = crypto.randomBytes(32).toString('hex'); // random raqamni yaratib beradi -->hex dgani ham harf ham son qatnashadi
+
+  const hashToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  this.resetTokenHash = hashToken;
+
+  this.resetTokenVaqti = Date.now() + 10 * 60 * 1000;
+
+  return token;
 };
 
 const User = mongoose.model('users', userScheme);

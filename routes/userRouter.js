@@ -12,6 +12,8 @@ userRouter.route('/signin').post(authController.login);
 
 userRouter.route('/forgotpassword').post(authController.forgotPassword);
 
+userRouter.route('/resetPassword/:token').post(authController.resetPassword);
+
 userRouter
   .route('/')
   .get(authController.protect, userController.getAlluser)

@@ -1,10 +1,15 @@
 const User = require('../models/userModel');
 const catchErrAsync = require('../utility/catchAsync');
 
-const bcrypt = require('bcryptjs');
+const crypto = require('crypto'); // random string yaratib berish bu core modul install qilish shartmas
 
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs'); // hashlash uchun kerak
+
+const jwt = require('jsonwebtoken'); // token yaratish uchun kerak
+
 const AppError = require('../utility/appError');
+
+const mail = require('../utility/mail');
 
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -14,7 +19,7 @@ const createToken = (id) => {
 
 const signup = catchErrAsync(async (req, res, next) => {
   const newUser = await User.create({
-    //roleni tashavordik chunki roleni admin qilibham kiradigan userlar bor !
+    // sign up qivotganimizda user yana boshqa narsalani qoshvormasligi uchun shunday yozdik
     name: req.body.name,
     password: req.body.password,
     photo: req.body.photo,
@@ -163,12 +168,109 @@ const forgotPassword = catchErrAsync(async (req, res, next) => {
 
   // 2.Database  da shu emailli odam bormi yoqmi qidirish
 
-  // 3.Reset token yaratish
+  const user = await User.findOne({
+    email: req.body.email,
+  });
+
+  if (!user) {
+    return next(
+      new AppError("Bunday foydalanuvchi ma'lumotlar bazasida mavjud emas", 404)
+    );
+  }
+
+  // 3.Reset token yaratish buni birinchi random raqamdan foydalanib keyin uni hashlab databasega saqlaymiz sababi database buzilsa ham haker uni korolmaydi
+
+  const token = user.hashTokenMethod();
+
+  await user.save({ validateBeforeSave: false }); // User.save schemada required narsalabor shu narsani oldini olish uchun options yozdik
+
+  console.log(token);
 
   // 4.User kiritgan emailga reset tokenni jonatish
+
+  const resetLink = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/users/resetPassword/${token}`; //"http:localhost:8000/api/v1/resetPassword/dfsfgdjshgjkashgkjshdgfkjs"
+
+  console.log(token);
+
+  const subject = 'Siz passwordni yangilash uchun link';
+
+  const html = `<h1>Siz passwordni reset qilish uchun shu tugmani bosing</h1><a style="color:red" href='${resetLink}'>Reset password</a>`;
+
+  const to = 'kalandarovjamshid01@gmail.com';
+
+  await mail({ subject, html, to }); // email jonatamiz
+
+  res.status(200).json({
+    status: 'succes',
+    message: 'Your email has been sent your email',
+  });
+
+  next();
 });
 
-module.exports = { signup, login, protect, role, forgotPassword };
+const resetPassword = catchErrAsync(async (req, res, next) => {
+  // 1. tokenni olamiz
+
+  const token = req.params.token;
+
+  const hashToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  // 2. Token tekshiramiz
+
+  const user = await User.findOne({
+    resetTokenHash: hashToken,
+    resetTokenVaqti: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(
+      new AppError('Tokenda hatolik mavjud yoki tokenni vaqti tugagan', 404)
+    );
+  }
+  console.log(user);
+  // 3.Yangi parol saqlaymiz va passwordChangedDate niyam saqlaymiz
+
+  if (!req.body.password || !req.body.passwordConfirm) {
+    return next(
+      new AppError('Password yoki password confirmni unutdingiz', 404)
+    );
+  }
+  if (!(req.body.password === req.body.passwordConfirm)) {
+    return next(new AppError('Kiritilgan parollar bir biriga mos emas', 404));
+  }
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordChangedDate = Date.now();
+
+  user.resetTokenHash = undefined;
+  user.resetTokenVaqti = undefined;
+
+  await user.save();
+
+  // 4. Jwt yuboramiz
+
+  const tokenJwt = createToken(user._id);
+
+  res.status(200).json({
+    status: 'success',
+    token: tokenJwt,
+    message: 'Parol yangilaydi',
+  });
+
+  next();
+});
+
+module.exports = {
+  signup,
+  login,
+  protect,
+  role,
+  forgotPassword,
+  resetPassword,
+};
 
 // autentifikatsiya -->login
 
