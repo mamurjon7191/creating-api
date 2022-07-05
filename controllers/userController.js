@@ -124,6 +124,48 @@ const updateMyPassword = catchErrAsync(async (req, res, next) => {
   });
 });
 
+const updateMe = catchErrAsync(async (req, res, next) => {
+  // 1. Malumotlarni yangilash
+
+  const user = await User.findById(req.user.id);
+
+  user.name = req.body.name || user.name;
+  user.email = req.body.email || user.email;
+  user.photo = req.body.photo || user.photo;
+
+  const newUser = await user.save({ validateBeforeSave: false });
+
+  res.status(201).json({
+    status: 'succes',
+    data: newUser,
+  });
+
+  next();
+});
+
+const deleteMe = catchErrAsync(async (req, res, next) => {
+  // User ni topamiz
+
+  const user = await User.findById(req.user.id).select('+active +password');
+
+  const tekshir = bcrypt.compare(req.body.password, user.password);
+
+  if (!tekshir) {
+    return next(new AppError('Siz parolni xato kiritdingiz', 401));
+  }
+
+  user.active = false;
+
+  await user.save({ validateBeforeSave: false });
+
+  res.status(204).json({
+    status: 'succes',
+    message: 'User ochirildi',
+  });
+});
+
+// Security best practise
+
 module.exports = {
   getAlluser,
   postAlluser,
@@ -131,4 +173,6 @@ module.exports = {
   deleteUser,
   updateUser,
   updateMyPassword,
+  updateMe,
+  deleteMe,
 };

@@ -64,6 +64,11 @@ const userScheme = mongoose.Schema({
   },
   resetTokenHash: String,
   resetTokenVaqti: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 userScheme.pre('save', async function (next) {
@@ -75,6 +80,13 @@ userScheme.pre('save', async function (next) {
   this.password = hashPassword;
 
   this.passwordConfirm = undefined; // pasword confirm bizga keremas shuning uchun databasega saqlash kerak emas shuning uchun undefined qib beramiz
+
+  next();
+});
+
+userScheme.pre(/^find/, async function (next) {
+  // oldidan ^ qoysak find sozi bn boshlanadigan metodlardan oldin shu midlware ishlaydi
+  this.find({ active: { $ne: false } });
 
   next();
 });
