@@ -270,6 +270,7 @@ module.exports = {
   role,
   forgotPassword,
   resetPassword,
+  createToken,
 };
 
 // autentifikatsiya -->login

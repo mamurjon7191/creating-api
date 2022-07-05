@@ -46,7 +46,7 @@ const userScheme = mongoose.Schema({
       },
       message: 'Iltimos togri password kiriting!',
     },
-    select: false, //responsega kemaydi lekin databasega yozadi
+    select: false, //responsega kemaydi lekin databasega yozadi password hich qachon kelishi keremas umuman
   },
   passwordConfirm: {
     type: String,
