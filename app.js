@@ -3,10 +3,28 @@ const morgan = require('morgan');
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
 const errController = require('./controllers/errController');
+const app = express();
+
+/////////////////-->For-Security<--//////////////////
+
+//1.
+const rateLimit = require('express-rate-limit');
+//2.
+
+//1.
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minutes
+  max: 10, // Limit each IP to 10 requests per `window` (here, per 15 minutes)
+  message: 'Too many requests',
+});
+
+// Apply the rate limiting middleware to all requests
+app.use('/api', limiter);
+//1.
+
+/////////////////-->/For-Security<--//////////////////
 
 const AppError = require('./utility/appError');
-
-const app = express();
 
 app.use(express.json()); // midleware
 app.use(morgan('dev'));
@@ -15,6 +33,8 @@ app.use(morgan('dev'));
 
 app.use('/api/v1/tours', (req, res, next) => {
   req.time = Date.now();
+  // console.log(req.protocol); // http
+  // console.log(req.get('host')); // 127.0.0.1:3000
   next();
 });
 

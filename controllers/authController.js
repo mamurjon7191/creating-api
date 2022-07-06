@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken'); // token yaratish uchun kerak
 const AppError = require('../utility/appError');
 
 const mail = require('../utility/mail');
+const { now } = require('mongoose');
 
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -31,6 +32,8 @@ const signup = catchErrAsync(async (req, res, next) => {
 
   // tokenni yasadik
   const token = createToken(newUser._id);
+
+  saveTokenCookie(res, token, req);
 
   res.status(200).json({
     status: 'succes',
@@ -66,7 +69,6 @@ const login = catchErrAsync(async (req, res, next) => {
   const tekshirHashga = async (oddiyPassword, hashPAssword) => {
     return await bcrypt.compare(oddiyPassword, hashPAssword);
   };
-  console.log(tekshirHashga(password, user.password));
 
   if (!(await tekshirHashga(password, user.password))) {
     return next(
@@ -80,6 +82,7 @@ const login = catchErrAsync(async (req, res, next) => {
   // 4.JWT token yasab berish
 
   const token = createToken(user._id);
+  saveTokenCookie(res, token, req);
 
   // Response qaytarish
 
@@ -253,6 +256,7 @@ const resetPassword = catchErrAsync(async (req, res, next) => {
   // 4. Jwt yuboramiz
 
   const tokenJwt = createToken(user._id);
+  saveTokenCookie(res, token, req);
 
   res.status(200).json({
     status: 'success',
@@ -262,6 +266,18 @@ const resetPassword = catchErrAsync(async (req, res, next) => {
 
   next();
 });
+
+///////////////////////////////////////////--> Cookie yasaymiz <--/////////////////////////////////////////////
+
+const saveTokenCookie = (res, token, req) => {
+  res.cookie('jwt', token, {
+    maxAge: 10 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: req.protocol === 'https' ? true : false,
+  });
+};
+
+///////////////////////////////////////////-->Cookie yasaymiz<--/////////////////////////////////////////////
 
 module.exports = {
   signup,
