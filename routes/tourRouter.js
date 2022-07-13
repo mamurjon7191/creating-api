@@ -1,6 +1,7 @@
 const express = require('express');
 const { router } = require('../app');
 const tourController = require('../controllers/tourController');
+const authController = require('../controllers/authController');
 
 const tourRouter = express.Router();
 
@@ -20,12 +21,12 @@ tourRouter.route('/report/:year?').get(tourController.tuorReportYear);
 
 tourRouter
   .route('/')
-  .get(tourController.getAllTours)
-  .post(tourController.postTour);
+  .get(authController.protect, tourController.getAllTours)
+  .post(authController.protect, tourController.postTour);
 tourRouter
   .route('/:id')
-  .delete(tourController.deleteTour)
-  .patch(tourController.updateTour)
-  .get(tourController.getTourById);
+  .delete(authController.protect, tourController.deleteTour)
+  .patch(authController.protect, tourController.updateTour)
+  .get(authController.protect, tourController.getTourById);
 
 module.exports = tourRouter;

@@ -6,13 +6,19 @@ const catchErrAsync = require('../utility/catchAsync');
 const FeatureAPI = require('./../utility/featureApi');
 
 const getAllTours = catchErrAsync(async (req, res) => {
+  console.log(req.query);
   const query = new FeatureAPI(req.query, Tour)
     .filter()
     .sorting()
     .field()
     .pagination();
 
-  const tours = await query.dataBaseQuery;
+  const tours = await query.dataBaseQuery.find().populate({
+    path: 'guides',
+    select: '-role -__v -passwordChangedDate', // shularni olib kelmaydi
+  });
+
+  // .find().populate("guides") bu kod qaysi fieldga borishini va id si orqali boshqa collectiondan ob kelishini qavs ichiga ("fieldni nomini yozamiz")
 
   res.status(200).json({
     status: 'succces',
@@ -41,7 +47,10 @@ const postTour = catchErrAsync(async (req, res) => {
   });
 });
 const getTourById = catchErrAsync(async (req, res) => {
-  const tour = await Tour.findById(req.params.id);
+  const tour = await Tour.findById(req.params.id).find().populate({
+    path: 'guides',
+    select: '-role -__v -passwordChangedDate', // shularni olib kelmaydi
+  });
   if (!tour) {
     throw new Error('Bunday idlik malumot topilmadi');
   }

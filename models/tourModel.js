@@ -2,11 +2,43 @@ const mongoose = require('mongoose');
 
 const tourScheme = new mongoose.Schema( // 1-argument abyekt 2-argument options vertual malumolarni jsonga otkazib saqlashi uchun yozamiz
   {
+    startLocation: {
+      description: {
+        type: String,
+        required: [true, 'You must enter description'],
+      },
+      type: {
+        type: String,
+        default: 'Point',
+      },
+      coordinates: [Number],
+      address: {
+        type: String,
+        required: [true, 'Siz addresni kiritishingiz shart'],
+      },
+    },
+    locations: [
+      {
+        description: {
+          type: String,
+          required: [true, 'You must enter description'],
+        },
+        type: {
+          type: String,
+          default: 'Point',
+        },
+        coordinates: [Number],
+        day: {
+          type: Number,
+          required: [true, 'Siz dayni kiritishingiz shart'],
+        },
+      },
+    ],
     name: {
       type: String,
       required: [true, 'Siz nameni kiritishingiz kerak'],
       minlength: [8, 'Name 8 ta harfdan kam bolmasligi kerak'],
-      maxlength: [16, 'Name 16 ta harfdan kop bolmasligi kerak'],
+      maxlength: [26, 'Name 16 ta harfdan kop bolmasligi kerak'],
     },
     secretInfo: {
       type: Boolean,
@@ -16,7 +48,7 @@ const tourScheme = new mongoose.Schema( // 1-argument abyekt 2-argument options 
       type: Number,
       required: [true, 'Siz durationni kiritishingiz kerak'],
       min: [1, 'Duration 1 dan kichik bolmasligi kerak'],
-      max: [10, 'Duration 10 dan katta bolmasligi kerak'],
+      max: [40, 'Duration 10 dan katta bolmasligi kerak'],
     },
     maxGroupSize: {
       type: Number,
@@ -49,8 +81,6 @@ const tourScheme = new mongoose.Schema( // 1-argument abyekt 2-argument options 
     },
     price: {
       type: Number,
-      // required: true,
-      unique: true,
     },
     summary: {
       type: String,
@@ -67,6 +97,13 @@ const tourScheme = new mongoose.Schema( // 1-argument abyekt 2-argument options 
     },
     images: [String],
     startDates: [Date],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId, // bu nima orqali ulanyotgaani
+        ref: 'users', // collection nomi
+      },
+    ],
+    // child reference bilan ulandi
   },
   {
     toJSON: { virtuals: true },
@@ -79,27 +116,27 @@ tourScheme.virtual('haftaliDavomEtish').get(function () {
 
 //Document midllware
 
-tourScheme.pre('save', function (next) {
-  // console.log(this);
-  this.name = this.name + 1342423432;
-  this.startTime = Date.now();
-  console.log(this.startTime);
-  next();
-});
+// tourScheme.pre('save', function (next) {
+//   // console.log(this);
+//   this.name = this.name + 1342423432;
+//   this.startTime = Date.now();
+//   console.log(this.startTime);
+//   next();
+// });
 
-tourScheme.post('save', function (doc, next) {
-  next();
-});
+// tourScheme.post('save', function (doc, next) {
+//   next();
+// });
 
 //Query midllware
 
-tourScheme.pre('find', function (next) {
-  this.find({ secretInfo: { $ne: true } });
-  next();
-});
-tourScheme.post('find', function (doc, next) {
-  next();
-});
+// tourScheme.pre('find', function (next) {
+//   this.find({ secretInfo: { $ne: true } });
+//   next();
+// });
+// tourScheme.post('find', function (doc, next) {
+//   next();
+// });
 
 const Tour = mongoose.model('tours', tourScheme);
 

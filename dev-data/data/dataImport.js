@@ -16,9 +16,7 @@ mongoose
     console.log(err);
   });
 
-const data = JSON.parse(
-  fs.readFileSync(`./dev-data/data/tours-simple.json`, 'utf-8')
-);
+const data = JSON.parse(fs.readFileSync(`./dev-data/data/tours.json`, 'utf-8'));
 // console.log(data);
 
 const addData = async () => {

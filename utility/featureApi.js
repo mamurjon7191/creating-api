@@ -20,25 +20,24 @@ class FeatureAPI {
     // /api/v1/tours?price[$gt]=400 -->shunday qilib
 
     const deleteQuery = ['sort', 'page', 'limit', 'field'];
-
+    let querycha = { ...this.cleintQuery };
     deleteQuery.forEach((val) => {
-      delete this.cleintQuery[val];
+      delete querycha[val];
     });
 
-    this.cleintQuery = JSON.stringify(this.cleintQuery);
+    querycha = JSON.stringify(querycha);
 
-    this.cleintQuery = this.cleintQuery.replace(
-      /\bgt|gte|lte|lt\b/g,
-      (val) => `$${val}`
-    );
+    querycha = querycha.replace(/\bgt|gte|lte|lt\b/g, (val) => `$${val}`);
 
-    let queryData = JSON.parse(this.cleintQuery);
+    let queryData = JSON.parse(querycha);
 
     this.dataBaseQuery = this.dataBaseQuery.find(queryData);
     return this;
   }
   sorting() {
+    console.log(this.cleintQuery);
     if (this.cleintQuery.sort) {
+      console.log('sortga kirdi');
       // /api/v1/tours?sort=duration,price ---> ikkita ushta narsani sort qilmoqchi bolsak vergul bilan yozamiz lekin sortni ichiga joy tashab yozish kerak
       let sortData = this.cleintQuery.sort.split(','); //-->[duration,data]
       sortData = sortData.join(' '); //-->"duration data"

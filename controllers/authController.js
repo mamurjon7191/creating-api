@@ -270,6 +270,7 @@ const resetPassword = catchErrAsync(async (req, res, next) => {
 ///////////////////////////////////////////--> Cookie yasaymiz <--/////////////////////////////////////////////
 
 const saveTokenCookie = (res, token, req) => {
+  // shu cookieni ishlashini sorimiz
   res.cookie('jwt', token, {
     maxAge: 10 * 24 * 60 * 60 * 1000,
     httpOnly: true,
