@@ -17,6 +17,7 @@ const tourScheme = new mongoose.Schema( // 1-argument abyekt 2-argument options 
         required: [true, 'Siz addresni kiritishingiz shart'],
       },
     },
+    // embading usul
     locations: [
       {
         description: {
@@ -112,6 +113,11 @@ const tourScheme = new mongoose.Schema( // 1-argument abyekt 2-argument options 
 
 tourScheme.virtual('haftaliDavomEtish').get(function () {
   return this.duration / 7;
+});
+tourScheme.virtual('reviews', {
+  ref: 'review', // collection nomi
+  localField: '_id', // ozini id sini olib ketib
+  foreignField: 'tour', // tour fieldi bilan tekshiradi
 });
 
 //Document midllware

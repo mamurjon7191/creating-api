@@ -12,7 +12,7 @@ const userScheme = mongoose.Schema({
     trim: true,
     required: true,
     minlength: [3, 'Siz eng kamida 3 ta symbol ishlata olasiz'],
-    maxlength: [12, 'Siz eng kopida 12 ta symbol ishlata olasiz'],
+    maxlength: [30, 'Siz eng kopida 12 ta symbol ishlata olasiz'],
   },
   email: {
     type: String,

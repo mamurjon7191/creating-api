@@ -13,10 +13,15 @@ const getAllTours = catchErrAsync(async (req, res) => {
     .field()
     .pagination();
 
-  const tours = await query.dataBaseQuery.find().populate({
-    path: 'guides',
-    select: '-role -__v -passwordChangedDate', // shularni olib kelmaydi
-  });
+  const tours = await query.dataBaseQuery
+    .find()
+    .populate({
+      path: 'guides',
+      select: '-role -__v -passwordChangedDate', // shularni olib kelmaydi
+    })
+    .populate({
+      path: 'reviews',
+    });
 
   // .find().populate("guides") bu kod qaysi fieldga borishini va id si orqali boshqa collectiondan ob kelishini qavs ichiga ("fieldni nomini yozamiz")
 

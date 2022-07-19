@@ -13,6 +13,7 @@ const reviewScheme = new mongoose.Schema({
     type: String,
     required: [true, 'Siz reviewni kiritshingiz shart'],
   },
+  // parent refensing
   rating: {
     type: Number,
     min: 1,
