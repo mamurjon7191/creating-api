@@ -2,6 +2,7 @@ const express = require('express');
 const { router } = require('../app');
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
+const reviewRouter = require('../routes/reviewRouter');
 
 const tourRouter = express.Router();
 
@@ -16,17 +17,42 @@ tourRouter.use(
   tourController.getAllTours
 );
 
-tourRouter.route('/stats').get(tourController.tourStats);
-tourRouter.route('/report/:year?').get(tourController.tuorReportYear);
+tourRouter
+  .route('/stats')
+  .get(
+    authController.protect,
+    authController.role(['admin']),
+    tourController.tourStats
+  );
+tourRouter
+  .route('/report/:year?')
+  .get(authController.protect, tourController.tuorReportYear);
 
 tourRouter
   .route('/')
   .get(authController.protect, tourController.getAllTours)
-  .post(authController.protect, tourController.postTour);
+  .post(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    tourController.postTour
+  );
+
+// Bitta tourni ichidan hamma reviewlarni olish
+
+tourRouter.use('/:id/reviews', reviewRouter); // nested routes review routerga yonaltirilvotti
+
 tourRouter
   .route('/:id')
-  .delete(authController.protect, tourController.deleteTour)
-  .patch(authController.protect, tourController.updateTour)
-  .get(authController.protect, tourController.getTourById);
+  .delete(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    tourController.deleteTour
+  )
+  .patch(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    tourController.updateTour
+  )
+  .get(tourController.getTourById);
 
 module.exports = tourRouter;

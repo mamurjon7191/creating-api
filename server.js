@@ -19,7 +19,7 @@ mongoose.connect(process.env.DATABASE, {}).then(() => {
 // console.log(process.env); // global ozgaruvchilarni korsatadi
 
 app.listen(process.env.PORT, process.env.SERVER_URL, () => {
-  console.log('Server  3000 portda ishga tushdi');
+  console.log(`Server  ${process.env.PORT} portda ishga tushdi`);
 }); // port ///  Ipadress
 
 process.on('unhandledRejection', (err) => {

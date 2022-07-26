@@ -31,7 +31,7 @@ const userScheme = mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'guide', 'moderator', 'team-lead', 'admin'],
+    enum: ['user', 'guide', 'moderator', 'lead-guide', 'admin'],
     default: 'user',
     required: [true, 'Siz roleni kiritishingiz kerak'],
   },

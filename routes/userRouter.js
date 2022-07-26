@@ -29,17 +29,33 @@ userRouter
 ///////////////////////////////////////////////////////////////////////////////
 userRouter
   .route('/')
-  .get(authController.protect, userController.getAlluser)
-  .post(authController.protect, userController.postAlluser);
+  .get(
+    authController.protect,
+    authController.role(['admin', 'lead-guide', 'guide']),
+    userController.getAlluser
+  )
+  .post(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    userController.postAlluser
+  );
 
 userRouter
   .route('/:id')
   .delete(
     authController.protect,
-    authController.role(['admin', 'team-lead']),
+    authController.role(['admin', 'lead-guide']),
     userController.deleteUser
   )
-  .patch(authController.protect, userController.updateUser)
-  .get(authController.protect, userController.getUserById);
+  .patch(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    userController.updateUser
+  )
+  .get(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    userController.getUserById
+  );
 
 module.exports = userRouter;

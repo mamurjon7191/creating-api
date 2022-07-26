@@ -12,6 +12,7 @@ module.exports = (err, req, res, next) => {
 
   if (process.env.NODE_ENV == 'DEVELOPMENT') {
     res.status(err.statusCode).json({
+      error: err,
       status: err.status,
       statusCode: err.statusCode,
       message: err.message,

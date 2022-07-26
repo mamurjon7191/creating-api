@@ -4,76 +4,33 @@ const catchErrAsync = require('../utility/catchAsync');
 const bcrypt = require('bcryptjs');
 const AppError = require('../utility/appError');
 const { createToken } = require('./authController');
+const {
+  getAll,
+  getOne,
+  add,
+  update,
+  deleteData,
+} = require('../controllers/handlerController');
 
-const getAlluser = catchErrAsync(async (req, res) => {
-  const data = await User.find();
-  res.status(200).json({
-    status: 'succes',
-    data: data,
-  });
-  res.status(404).json({
-    status: 'Failed',
-    user: req.user,
-    message: err,
-  });
-});
+const getAlluser = (req, res, next) => {
+  getAll(req, res, next, User);
+};
 
-const postAlluser = catchErrAsync(async (req, res) => {
-  const data = req.body;
-  const postData = await User.create(data);
-  res.status(201).json({
-    status: 'succes',
-    data: postData,
-  });
-  res.status(404).json({
-    status: 'Failed',
-    message: err,
-  });
-});
+const postAlluser = (req, res, next) => {
+  add(req, res, next, User);
+};
 
-const getUserById = catchErrAsync(async (req, res) => {
-  const id = req.params.id;
-  const data = await User.findById(id);
-  res.status(200).json({
-    status: 'succes',
-    data: data,
-  });
-  console.log(err);
-  res.status(404).json({
-    status: 'Failed',
-    message: err,
-  });
-});
+const getUserById = (req, res, next) => {
+  getOne(req, res, next, User);
+};
 
-const deleteUser = catchErrAsync(async (req, res) => {
-  const id = req.params.id;
-  const data = await User.findByIdAndDelete(id);
-  res.status(204).json({
-    status: 'succes',
-  });
+const deleteUser = (req, res, next) => {
+  deleteData(req, res, next, User);
+};
 
-  res.status(404).json({
-    status: 'Failed',
-    message: err,
-  });
-});
-
-const updateUser = catchErrAsync(async (req, res) => {
-  const id = req.params.id;
-  const data = await User.findByIdAndUpdate(id, req.body, {
-    new: true,
-  });
-  console.log(req.body);
-  res.status(200).json({
-    status: 'succes',
-    data: data,
-  });
-
-  res.status(404).json({
-    status: 'Failed',
-    message: err,
-  });
-});
+const updateUser = (req, res, next) => {
+  update(req, res, next, User);
+};
 
 // Bu saytga kirgandan keyin parolini ozgartirish
 

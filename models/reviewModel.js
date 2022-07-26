@@ -25,6 +25,11 @@ const reviewScheme = new mongoose.Schema({
   },
 });
 
+// 1-4
+// 1-4 shunaqa bop qomasligi uchun
+
+reviewScheme.index({ user: 1, tour: 1 }, { unique: true }); // faqat bitta odam bitta tourga rating bera oladi
+
 const Review = mongoose.model('review', reviewScheme);
 
 module.exports = Review;

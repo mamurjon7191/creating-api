@@ -4,26 +4,36 @@ const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
 const errController = require('./controllers/errController');
 
+const path = require('path');
+
 const reviewRouter = require('./routes/reviewRouter');
 
 const app = express();
 
 app.use(express.json({ limit: '10kb' })); // midleware
 
+app.set('view engine', 'pug');
+
+app.set('views', path.join(__dirname, 'view'));
+
 /////////////////-->For-Security<--//////////////////
 
 //1.
 const rateLimit = require('express-rate-limit'); // saytga juda kop sorov jonatishni oldini olish
+
 //2.
 const helmet = require('helmet'); // requestni headerini securitysini kuchaytirish
+
 //3
 const sanitize = require('express-mongo-sanitize'); // bodyni ichini tekshiradi virus pirus yubormasligini
+
 //4
 const xss = require('xss-clean'); // xss atakaga qarshi html ichiga virus tiqib yubormoqchi bolsak shini tekshiradi
 //5
 const hpp = require('hpp'); // bu urlga ikkita bir xil query yozib qoysak oxirini oladi
 
 //-------------------------------------------------------------------------------
+
 //1.
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minutes
@@ -33,10 +43,12 @@ const limiter = rateLimit({
 
 // Apply the rate limiting middleware to all requests
 app.use('/api', limiter);
+
 //2.
 app.use(helmet());
 //3.
 app.use(sanitize());
+
 //4
 app.use(xss());
 //5
@@ -58,6 +70,12 @@ app.use('/api/v1/tours', (req, res, next) => {
 });
 
 app.use(express.static('public'));
+
+//=------------------
+app.use('/home', (req, res, next) => {
+  res.status(200).render('base');
+});
+//=------------------
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
