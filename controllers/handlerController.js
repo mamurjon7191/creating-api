@@ -24,10 +24,7 @@ const getAll = catchError(async (req, res, next, Model, options, options2) => {
     .field()
     .pagination();
   if (options2) {
-    datas = await filter.dataBaseQuery
-      .populate(options)
-      .populate(options2)
-      .explain();
+    datas = await filter.dataBaseQuery.populate(options).populate(options2);
   } else if (options) {
     datas = await filter.dataBaseQuery.populate(options);
     console.log('option 2ga kirdi');

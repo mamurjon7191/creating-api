@@ -2,11 +2,12 @@ const express = require('express');
 const morgan = require('morgan');
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
+const reviewRouter = require('./routes/reviewRouter');
+const viewRouter = require('./routes/viewRouter');
+
 const errController = require('./controllers/errController');
 
 const path = require('path');
-
-const reviewRouter = require('./routes/reviewRouter');
 
 const app = express();
 
@@ -72,9 +73,7 @@ app.use('/api/v1/tours', (req, res, next) => {
 app.use(express.static('public'));
 
 //=------------------
-app.use('/home', (req, res, next) => {
-  res.status(200).render('base');
-});
+app.use('/', viewRouter);
 //=------------------
 
 app.use('/api/v1/tours', tourRouter);
