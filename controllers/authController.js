@@ -330,7 +330,6 @@ const saveTokenCookie = (res, token, req) => {
 ///////////////////////////////////////////-->Cookie yasaymiz<--/////////////////////////////////////////////
 
 const logout = (req, res, next) => {
-  console.log('logoutga kirdi');
   res.cookie('jwt', 'logout', {
     httpOnly: true,
   });

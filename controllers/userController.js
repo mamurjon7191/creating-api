@@ -1,5 +1,6 @@
 const User = require('../models/userModel');
 const catchErrAsync = require('../utility/catchAsync');
+const catchErrAsyncAuth = require('../utility/catchAsyncAuth');
 
 const bcrypt = require('bcryptjs');
 const AppError = require('../utility/appError');
@@ -34,7 +35,7 @@ const updateUser = (req, res, next) => {
 
 // Bu saytga kirgandan keyin parolini ozgartirish
 
-const updateMyPassword = catchErrAsync(async (req, res, next) => {
+const updateMyPassword = catchErrAsyncAuth(async (req, res, next) => {
   // 1. Eski password kiritilganmi yoki yoqmi
 
   if (!req.body.oldPassword) {
@@ -70,9 +71,11 @@ const updateMyPassword = catchErrAsync(async (req, res, next) => {
   user.password = req.body.newPassword;
   user.passwordConfirm = req.body.confirmNewPassword;
   user.passwordChangedDate = Date.now();
-  await user.save();
+
+  await user.save({ validateBeforeSave: false });
 
   const token = createToken(user._id);
+  saveTokenCookie(res, token, req);
 
   res.status(200).json({
     status: 'Succes',
@@ -81,8 +84,10 @@ const updateMyPassword = catchErrAsync(async (req, res, next) => {
   });
 });
 
-const updateMe = catchErrAsync(async (req, res, next) => {
+const updateMe = catchErrAsyncAuth(async (req, res, next) => {
   // 1. Malumotlarni yangilash
+
+  // protect req.user=user
 
   const user = await User.findById(req.user.id);
 
@@ -100,7 +105,7 @@ const updateMe = catchErrAsync(async (req, res, next) => {
   next();
 });
 
-const deleteMe = catchErrAsync(async (req, res, next) => {
+const deleteMe = catchErrAsyncAuth(async (req, res, next) => {
   // User ni topamiz
 
   const user = await User.findById(req.user.id).select('+active +password');
@@ -122,6 +127,15 @@ const deleteMe = catchErrAsync(async (req, res, next) => {
 });
 
 // Security best practise
+
+const saveTokenCookie = (res, token, req) => {
+  // shu cookieni ishlashini sorimiz
+  res.cookie('jwt', token, {
+    maxAge: 10 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: req.protocol === 'https' ? true : false,
+  });
+};
 
 module.exports = {
   getAlluser,

@@ -31,7 +31,17 @@ const login = async (req, res, next) => {
   }
 };
 
+const account = (req, res, next) => {
+  try {
+    console.log('accountga kirdi');
+    res.render('account');
+  } catch (err) {
+    console.log(err.message);
+  }
+};
+
 module.exports = {
+  account,
   getAllTour,
   getOneTour,
   login,
