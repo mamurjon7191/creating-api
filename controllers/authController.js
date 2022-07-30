@@ -1,5 +1,6 @@
 const User = require('../models/userModel');
-const catchErrAsync = require('../utility/catchAsync');
+
+const catchErrAsyncAuth = require('../utility/catchAsyncAuth');
 
 const crypto = require('crypto'); // random string yaratib berish bu core modul install qilish shartmas
 
@@ -18,7 +19,7 @@ const createToken = (id) => {
   });
 };
 
-const signup = catchErrAsync(async (req, res, next) => {
+const signup = catchErrAsyncAuth(async (req, res, next) => {
   const newUser = await User.create({
     // sign up qivotganimizda user yana boshqa narsalani qoshvormasligi uchun shunday yozdik
     name: req.body.name,
@@ -42,7 +43,7 @@ const signup = catchErrAsync(async (req, res, next) => {
   });
 });
 
-const login = catchErrAsync(async (req, res, next) => {
+const login = catchErrAsyncAuth(async (req, res, next) => {
   // 1.Email bilan password borligini tekshirish
 
   const { email, password } = req.body;
@@ -95,7 +96,7 @@ const login = catchErrAsync(async (req, res, next) => {
   next();
 });
 
-const protect = catchErrAsync(async (req, res, next) => {
+const protect = catchErrAsyncAuth(async (req, res, next) => {
   // console.log(req.headers.authorization);
 
   // 1. Token bor yoqligini tekshirish headerdan
@@ -107,6 +108,8 @@ const protect = catchErrAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
   if (!token) {
     return next(
@@ -148,11 +151,56 @@ const protect = catchErrAsync(async (req, res, next) => {
 
   console.log(user);
   req.user = user;
+  res.locals.userData = user; // pug uchun yozdik
+
   next();
 });
 
+const isSign = async (req, res, next) => {
+  // 1. Token bor yoqligini tekshirish headerdan
+
+  let token;
+
+  if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+  if (!token || token === 'logout') {
+    return next();
+  }
+  console.log;
+
+  // 2.Tokenni tekshirish user olib ketgan token bn serverni tokeni
+
+  const tekshir = await jwt.verify(token, process.env.JWT_SECRET); // bu error qaytaradi
+
+  // console.log(tekshir);
+
+  // 3.Tokenni ichidan idni olib data basedagi userlarni id si bilan solishtirish
+
+  const user = await User.findOne({ _id: tekshir.id });
+
+  if (!user) {
+    return next();
+  }
+
+  // 4 Agar parol ozgargan bolsa tokenni amal qilishi tugagani tekshirish
+
+  if (user.passwordChangedDate) {
+    // true bosa kirishi kk
+    //user.passwordChangedDate.getTime() / 1000 milli sekundga otkazdik
+    console.log(tekshir.iat, user.passwordChangedDate.getTime() / 1000);
+    if (tekshir.iat < user.passwordChangedDate.getTime() / 1000) {
+      return next();
+    }
+  }
+
+  res.locals.userData = user; // pug uchun yozdik
+
+  return next();
+};
+
 const role = (roles) => {
-  return catchErrAsync(async (req, res, next) => {
+  return catchErrAsyncAuth(async (req, res, next) => {
     // 1.Userni rolini olamiz databasedan ,tekshiramiz
     if (!roles.includes(req.user.role)) {
       return next(
@@ -163,7 +211,7 @@ const role = (roles) => {
   });
 };
 
-const forgotPassword = catchErrAsync(async (req, res, next) => {
+const forgotPassword = catchErrAsyncAuth(async (req, res, next) => {
   // 1.Emailni yozilgan yozilmaganini topish
 
   if (!req.body.email) {
@@ -214,7 +262,7 @@ const forgotPassword = catchErrAsync(async (req, res, next) => {
   next();
 });
 
-const resetPassword = catchErrAsync(async (req, res, next) => {
+const resetPassword = catchErrAsyncAuth(async (req, res, next) => {
   // 1. tokenni olamiz
 
   const token = req.params.token;
@@ -281,7 +329,18 @@ const saveTokenCookie = (res, token, req) => {
 
 ///////////////////////////////////////////-->Cookie yasaymiz<--/////////////////////////////////////////////
 
+const logout = (req, res, next) => {
+  console.log('logoutga kirdi');
+  res.cookie('jwt', 'logout', {
+    httpOnly: true,
+  });
+  res.status(200).json({
+    status: 'success',
+  });
+};
+
 module.exports = {
+  logout,
   signup,
   login,
   protect,
@@ -289,6 +348,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   createToken,
+  isSign,
 };
 
 // autentifikatsiya -->login

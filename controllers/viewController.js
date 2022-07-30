@@ -15,13 +15,24 @@ const getOneTour = async (req, res, next) => {
     const reviews = await Review.find({
       tour: req.params.id,
     }).populate('user');
+    if (!data) {
+      return next(new AppError('This tour has not found!'));
+    }
     res.status(200).render('tour', { tour: data, reviews });
   } catch (err) {
     console.log(err.message);
+  }
+};
+const login = async (req, res, next) => {
+  try {
+    res.status(200).render('login');
+  } catch (err) {
+    console.log(err);
   }
 };
 
 module.exports = {
   getAllTour,
   getOneTour,
+  login,
 };

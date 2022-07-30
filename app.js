@@ -4,6 +4,8 @@ const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
 const reviewRouter = require('./routes/reviewRouter');
 const viewRouter = require('./routes/viewRouter');
+const cookie_parser = require('cookie-parser');
+const { urlencoded } = require('express');
 
 const errController = require('./controllers/errController');
 
@@ -12,6 +14,8 @@ const path = require('path');
 const app = express();
 
 app.use(express.json({ limit: '10kb' })); // midleware
+app.use(cookie_parser());
+app.use(urlencoded()); // malumotni formadan olish uchun kerak boldi
 
 app.set('view engine', 'pug');
 
