@@ -4,7 +4,9 @@ const authController = require('../controllers/authController');
 
 const viewRouter = express.Router();
 
-viewRouter.route('/account').get(authController.isSign, viewController.account);
+viewRouter
+  .route('/account')
+  .get(authController.protect, viewController.account);
 
 viewRouter.route('/login').get(authController.isSign, viewController.login);
 viewRouter.route('/logout').post(authController.logout);

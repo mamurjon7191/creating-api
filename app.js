@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
+const languageRouter = require('./routes/languageRouter');
 const reviewRouter = require('./routes/reviewRouter');
 const viewRouter = require('./routes/viewRouter');
 const cookie_parser = require('cookie-parser');
@@ -15,7 +16,7 @@ const app = express();
 
 app.use(express.json({ limit: '10kb' })); // midleware
 app.use(cookie_parser());
-app.use(urlencoded()); // malumotni formadan olish uchun kerak boldi
+// app.use(urlencoded()); // malumotni formadan olish uchun kerak boldi
 
 app.set('view engine', 'pug');
 
@@ -83,6 +84,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/languages', languageRouter);
 
 app.all('*', (req, res, next) => {
   // all yozganimizni sababi qaysi urlga murojat qilishimizni bilmaymiz

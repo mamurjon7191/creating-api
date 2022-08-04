@@ -47,7 +47,7 @@ block main
               a(href='#')
                 svg
                   use(xlink:href='img/icons.svg#icon-briefcase')
-
+                | Manage bookings
       .user-view__content
         .user-view__form-container
           h2.heading-secondary.ma-bt-md Your account settings
@@ -59,7 +59,7 @@ block main
               label.form__label(for='email') Email address
               input#email.form__input.input-email(type='email', value=`${userData.email}`, required)
             .form__group.form__photo-upload
-              img.form__user-photo(src='img/user.jpg', alt='User photo')
+              img.form__user-photo(src=`/img/users/${userData.photo}`, alt='User photo')
               a.btn-text(href='') Choose new photo
             .form__group.right
               button.btn.btn--small.btn--green.update-me-btn Save settings

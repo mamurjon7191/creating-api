@@ -151,7 +151,7 @@ const protect = catchErrAsyncAuth(async (req, res, next) => {
 
   console.log(user);
   req.user = user;
-  res.locals.userData = user; // pug uchun yozdik
+  res.locals.userData = user; // pug oqishi uchun yozdik keyin userData qilib ishlaturamiz,
 
   next();
 });

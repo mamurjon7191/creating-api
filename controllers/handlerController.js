@@ -58,7 +58,6 @@ const add = catchError(async (req, res, next, Model) => {
 const update = catchError(async (req, res, next, Model) => {
   const data = await Model.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-    validator: true,
   });
   responseFunction(res, 201, data);
 });

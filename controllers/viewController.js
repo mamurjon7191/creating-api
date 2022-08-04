@@ -1,12 +1,18 @@
+const Language = require('../models/languageModel');
 const Review = require('../models/reviewModel');
 const Tour = require('../models/tourModel');
 const AppError = require('../utility/appError');
 const catchErrAsync = require('../utility/catchAsync');
 
+let language;
+
 const getAllTour = async (req, res, next) => {
   const datas = await Tour.find();
-
-  res.status(200).render('overview', { tours: datas });
+  language = await Language.find();
+  res.status(200).render('overview', {
+    tours: datas,
+    language,
+  });
 };
 
 const getOneTour = async (req, res, next) => {
