@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const catchErrAsync = require('../utility/catchAsync');
 const catchErrAsyncAuth = require('../utility/catchAsyncAuth');
+const authController = require('./authController');
 
 const bcrypt = require('bcryptjs');
 const AppError = require('../utility/appError');
@@ -75,7 +76,7 @@ const updateMyPassword = catchErrAsyncAuth(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   const token = createToken(user._id);
-  saveTokenCookie(res, token, req);
+  authController.saveTokenCookie(res, token, req);
 
   res.status(200).json({
     status: 'Succes',
@@ -127,15 +128,6 @@ const deleteMe = catchErrAsyncAuth(async (req, res, next) => {
 });
 
 // Security best practise
-
-const saveTokenCookie = (res, token, req) => {
-  // shu cookieni ishlashini sorimiz
-  res.cookie('jwt', token, {
-    maxAge: 10 * 24 * 60 * 60 * 1000,
-    httpOnly: true,
-    secure: req.protocol === 'https' ? true : false,
-  });
-};
 
 module.exports = {
   getAlluser,

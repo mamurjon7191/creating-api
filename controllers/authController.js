@@ -13,6 +13,15 @@ const AppError = require('../utility/appError');
 const mail = require('../utility/mail');
 const { now } = require('mongoose');
 
+const saveTokenCookie = (res, token, req) => {
+  // shu cookieni ishlashini sorimiz
+  res.cookie('jwt', token, {
+    maxAge: 10 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: req.protocol === 'https' ? true : false,
+  });
+};
+
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -318,15 +327,6 @@ const resetPassword = catchErrAsyncAuth(async (req, res, next) => {
 
 ///////////////////////////////////////////--> Cookie yasaymiz <--/////////////////////////////////////////////
 
-const saveTokenCookie = (res, token, req) => {
-  // shu cookieni ishlashini sorimiz
-  res.cookie('jwt', token, {
-    maxAge: 10 * 24 * 60 * 60 * 1000,
-    httpOnly: true,
-    secure: req.protocol === 'https' ? true : false,
-  });
-};
-
 ///////////////////////////////////////////-->Cookie yasaymiz<--/////////////////////////////////////////////
 
 const logout = (req, res, next) => {
@@ -348,6 +348,7 @@ module.exports = {
   resetPassword,
   createToken,
   isSign,
+  saveTokenCookie,
 };
 
 // autentifikatsiya -->login
