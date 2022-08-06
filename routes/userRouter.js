@@ -18,9 +18,12 @@ userRouter
   .route('/updateMyPassword')
   .patch(authController.protect, userController.updateMyPassword);
 
-userRouter
-  .route('/updateMe')
-  .patch(authController.protect, userController.updateMe);
+userRouter.route('/updateMe').patch(
+  authController.protect,
+  userController.uploadUserImage, // --> req.file hosil qilindi
+  userController.resizeImage,
+  userController.updateMe
+);
 
 userRouter
   .route('/deleteMe')

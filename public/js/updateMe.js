@@ -1,14 +1,11 @@
 // const { default: axios } = require('axios');
 
-const enterSystem1 = async (name, email) => {
+const enterSystem1 = async (formData) => {
   try {
     const res = await axios({
       method: 'PATCH',
       url: '/api/v1/users/updateMe',
-      data: {
-        name: name,
-        email: email,
-      },
+      data: formData,
     });
     console.log(res.status);
     if (res.status === 201) {
@@ -26,7 +23,15 @@ document.querySelector('.update-me-btn').addEventListener('click', (e) => {
   e.preventDefault();
   const name = document.querySelector('.input-name').value;
   const email = document.querySelector('.input-email').value;
-  enterSystem1(name, email);
+  const photo = document.querySelector('#photo').files[0];
+
+  let formData = new FormData(); // Rasmni base64 shifrlab jonatish un hamma malumotlani bittaga jamladi
+
+  formData.append('name', name);
+  formData.append('email', email);
+  formData.append('photo', photo);
+
+  enterSystem1(formData);
 });
 
 const enterSystem2 = async (passwordCurrent, newPassword, confirmPassword) => {

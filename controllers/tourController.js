@@ -2,6 +2,69 @@
 const Review = require('../models/reviewModel');
 const Tour = require('../models/tourModel');
 
+//-->Multer
+const multer = require('multer');
+
+const multerStorage = multer.memoryStorage(); // buffer ga saqlab qoyadi tezkor hotiraga
+
+const filterImage = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(
+      new AppError(
+        'You can upload only image format! Sorry about unconvinience',
+        false
+      )
+    );
+  }
+};
+
+const upload = multer({
+  // faylni qayerga saqlashi
+  storage: multerStorage,
+  fileFilter: filterImage,
+});
+
+const uploadTourImages = upload.fields([
+  {
+    name: 'imageCover',
+    maxCount: 1,
+  },
+  { name: 'images', maxCount: 3 },
+]);
+
+const resizeImage = async (req, res, next) => {
+  if (req.files.imageCover) {
+    const ext = req.files.imageCover[0].mimetype.split('/')[1]; // type .jpg .png va hokozo
+    req.body.imageCover = `tour-${req.user.id}-${Date.now()}.${ext}`;
+    await sharp(req.files.imageCover[0].buffer)
+      .resize(500, 500)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`${__dirname}/../public/img/tours/${req.body.imageCover}`);
+  }
+  if (req.files.images) {
+    const ext = req.files.images[0].mimetype.split('/')[1]; // type .jpg .png va hokozo
+
+    req.body.images = [];
+
+    req.files.images.map((val, key) => {
+      let imageName = `tour-${req.user.id}-${Date.now()}-${key + 1}.${ext}`;
+
+      sharp(val.buffer)
+        .resize(1500, 1000)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`${__dirname}/../public/img/tours/${imageName}`);
+      req.body.images.push(imageName);
+    });
+  }
+  return next();
+};
+
+//-->Multer
+
 const {
   getAll,
   getOne,
@@ -13,6 +76,8 @@ const {
 const catchErrAsync = require('../utility/catchAsync');
 
 const FeatureAPI = require('./../utility/featureApi');
+const catchErrAsyncAuth = require('../utility/catchAsyncAuth');
+const sharp = require('sharp');
 
 const options = {
   path: 'guides',
@@ -33,6 +98,7 @@ const getTourById = (req, res, next) => {
 };
 
 const updateTour = (req, res, next) => {
+  console.log(req.files);
   update(req, res, next, Tour);
 };
 
@@ -104,4 +170,6 @@ module.exports = {
   deleteTour,
   tourStats,
   tuorReportYear,
+  uploadTourImages,
+  resizeImage,
 };

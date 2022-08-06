@@ -51,6 +51,8 @@ tourRouter
   .patch(
     authController.protect,
     authController.role(['admin', 'lead-guide']),
+    tourController.uploadTourImages,
+    tourController.resizeImage,
     tourController.updateTour
   )
   .get(tourController.getTourById);
